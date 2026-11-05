@@ -42,7 +42,6 @@ vim.pack.add({
 	{ src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/saghen/blink.cmp" },
 	{ src = "https://github.com/saghen/blink.lib" },
-	{ src = "https://github.com/akinsho/toggleterm.nvim" },
 	{ src = "https://github.com/folke/trouble.nvim" },
 	{ src = "https://github.com/lewis6991/gitsigns.nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
@@ -60,8 +59,8 @@ require("nvim-treesitter").install({
 })
 
 vim.api.nvim_create_autocmd('FileType', {
-  pattern = { '<filetype>' },
-  callback = function() vim.treesitter.start() end,
+    pattern = { "c", "cpp", "go", "lua", "java" },
+    callback = function() vim.treesitter.start() end,
 })
 
 require("mason").setup()
@@ -77,11 +76,11 @@ require("gitsigns").setup({
 })
 
 -- Git
-vim.keymap.set("n", "]h", function()
+vim.keymap.set("n", "[h", function()
     require("gitsigns").next_hunk()
 end, { desc = "Next Git hunk" })
 
-vim.keymap.set("n", "[h", function()
+vim.keymap.set("n", "]h", function()
     require("gitsigns").prev_hunk()
 end, { desc = "Previous Git hunk" })
 
@@ -107,18 +106,13 @@ end, { desc = "Blame line" })
 
 require("trouble").setup()
 
-require("toggleterm").setup({
-		open_mapping = [[<c-\>]],
-		direction = "float"
-})
-
 require("oil").setup({
 		columns = {
 				"permissions",
 				"icon"
 		},
 		view_options = {
-				show_hiddens = true
+				show_hidden = true
 		}
 })
 
@@ -145,7 +139,7 @@ require("mini.surround").setup()
 require("mini.statusline").setup()
 
 vim.lsp.config('*', {
-    root_markers = { ".git" },
+    capabilities = require("blink.cmp").get_lsp_capabilities(),
 })
 for _, server in ipairs(servers) do
 		vim.lsp.enable(server)
@@ -164,8 +158,8 @@ vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
 
 vim.keymap.set("n", "<leader>ld", vim.diagnostic.open_float, { desc = "Line diagnostics" })
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
+vim.keymap.set("n", "]d", vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
+vim.keymap.set("n", "[d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
 
 vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, { desc = "Format" })
 
