@@ -46,6 +46,22 @@ vim.pack.add({
 	{ src = "https://github.com/folke/trouble.nvim" },
 	{ src = "https://github.com/lewis6991/gitsigns.nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
+	{ src = "https://github.com/nvim-treesitter/nvim-treesitter" },
+})
+
+require("nvim-treesitter").setup({})
+
+require("nvim-treesitter").install({
+    "c",
+    "cpp",
+    "go",
+    "lua",
+    "java"
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { '<filetype>' },
+  callback = function() vim.treesitter.start() end,
 })
 
 require("mason").setup()
@@ -128,6 +144,9 @@ require("mini.pairs").setup()
 require("mini.surround").setup()
 require("mini.statusline").setup()
 
+vim.lsp.config('*', {
+    root_markers = { ".git" },
+})
 for _, server in ipairs(servers) do
 		vim.lsp.enable(server)
 end
@@ -203,7 +222,6 @@ vim.keymap.set("n", "<leader>pc", pack_clean)
 
 local autocmd = vim.api.nvim_create_autocmd
 autocmd('TextYankPost', {
-    group = yank_group,
     pattern = '*',
     callback = function()
         vim.highlight.on_yank({
@@ -224,8 +242,8 @@ vim.keymap.set("n", "N", "Nzzzv")
 vim.keymap.set("n", "=ap", "ma=ap'a")
 
 
-vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")
-vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
+vim.keymap.set("n", "<C-j>", "<cmd>cnext<CR>zz")
+vim.keymap.set("n", "<C-k>", "<cmd>cprev<CR>zz")
 vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz")
 vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz")
 
