@@ -33,12 +33,11 @@ vim.opt.updatetime = 50
 vim.o.signcolumn = "yes"
 vim.o.winborder = "rounded"
 
-local servers = { "clangd", "pyright", "gopls", "jdtls"}
+local servers = { "clangd", "pyright", "gopls", "jdtls", "ols"}
 
 vim.pack.add({
 	{ src = "https://github.com/folke/tokyonight.nvim" },
 	{ src = "https://github.com/neovim/nvim-lspconfig" },
-	{ src = "https://github.com/nvim-mini/mini.nvim" },
 	{ src = "https://github.com/stevearc/oil.nvim" },
 	{ src = "https://github.com/saghen/blink.cmp" },
 	{ src = "https://github.com/saghen/blink.lib" },
@@ -46,7 +45,38 @@ vim.pack.add({
 	{ src = "https://github.com/lewis6991/gitsigns.nvim" },
 	{ src = "https://github.com/mason-org/mason.nvim" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter" },
+	{ src = "https://github.com/nvim-telescope/telescope.nvim" },
+	{ src = "https://github.com/nvim-lua/plenary.nvim" },
 })
+
+require('telescope').setup({})
+
+local preview_utils = require("telescope.previewers.utils")
+preview_utils.ts_highlighter = function(bufnr, ft)
+    local lang = vim.treesitter.language.get_lang(ft) or ft
+    if not lang or lang == "" then
+        return false
+    end
+
+    return pcall(vim.treesitter.start, bufnr, lang)
+end
+
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>f', builtin.find_files, { desc = 'Telescope find files' })
+vim.keymap.set('n', '<leader>g', builtin.live_grep, { desc = 'Telescope live grep' })
+vim.keymap.set('n', '<leader>b', builtin.buffers, { desc = 'Telescope buffers' })
+vim.keymap.set('n', '<C-p>', builtin.git_files, {})
+vim.keymap.set('n', '<leader>G', function()
+    builtin.grep_string({ search = vim.fn.input("Grep > ") })
+end)
+vim.keymap.set('n', '<leader>ws', function()
+    local word = vim.fn.expand("<cword>")
+    builtin.grep_string({ search = word })
+end)
+vim.keymap.set('n', '<leader>Ws', function()
+    local word = vim.fn.expand("<cWORD>")
+    builtin.grep_string({ search = word })
+end)
 
 require("nvim-treesitter").setup({})
 
@@ -55,12 +85,13 @@ require("nvim-treesitter").install({
     "cpp",
     "go",
     "lua",
-    "java"
+    "java",
+    "odin"
 })
 
 vim.api.nvim_create_autocmd('FileType', {
-    pattern = { "c", "cpp", "go", "lua", "java" },
-    callback = function() vim.treesitter.start() end,
+    pattern = { "c", "cpp", "go", "lua", "java", "odin" },
+    callback = function() pcall(vim.treesitter.start, 0) end,
 })
 
 require("mason").setup()
@@ -116,7 +147,6 @@ require("oil").setup({
 		}
 })
 
-
 require("blink.cmp").setup({
         keymap = {
             preset = 'default',
@@ -132,11 +162,6 @@ require("blink.cmp").setup({
         },
 		fuzzy = { implementation = 'prefer_rust' }
 })
-
-require("mini.pick").setup()
-require("mini.pairs").setup()
-require("mini.surround").setup()
-require("mini.statusline").setup()
 
 vim.lsp.config('*', {
     capabilities = require("blink.cmp").get_lsp_capabilities(),
@@ -192,16 +217,11 @@ end
 vim.cmd.colorscheme("tokyonight-night")
 
 vim.keymap.set("n", "<leader>e", ":Oil<CR>")
-vim.keymap.set("n", "<leader>f", ":Pick files<CR>")
-vim.keymap.set("n", "<leader>h", ":Pick help<CR>")
-vim.keymap.set("n", "<leader>g", ":Pick grep_live<CR>")
-vim.keymap.set("n", "<leader>b", ":Pick buffers<CR>")
 vim.keymap.set("n", "<leader>q", ":Trouble diagnostics toggle<CR>")
 
 -- Buffers
 vim.keymap.set("n", "<S-l>", "<cmd>bnext<CR>", { desc = "Next buffer" })
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
-vim.keymap.set("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete buffer" })
 
 vim.keymap.set("x", "<leader>p", [["_dP]])
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
